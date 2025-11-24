@@ -1,3 +1,56 @@
 <resources>
-    <string name="app_name">Project</string>
+    <string name="app_name">Delivery App</string>
+
+    <!-- User Types -->
+    <string name="select_user_type">Sélectionner le type d\'utilisateur</string>
+    <string name="livreur">Livreur</string>
+    <string name="manager">Manager Restaurant</string>
+    <string name="client">Client</string>
+
+    <!-- Common -->
+    <string name="save">Enregistrer</string>
+    <string name="cancel">Annuler</string>
+    <string name="confirm">Confirmer</string>
+    <string name="loading">Chargement...</string>
+    <string name="error">Erreur</string>
+    <string name="success">Succès</string>
+
+    <!-- Order Status -->
+    <string name="pending">En attente</string>
+    <string name="accepted">Acceptée</string>
+    <string name="picked_up">Récupérée</string>
+    <string name="delivered">Livrée</string>
+    <string name="cancelled">Annulée</string>
+
+    <!-- Livreur -->
+    <string name="available_orders">Commandes Disponibles</string>
+    <string name="my_deliveries">Mes Livraisons</string>
+    <string name="accept_order">Accepter</string>
+    <string name="picked_up_order">Récupéré</string>
+    <string name="deliver_order">Livrer</string>
+    <string name="navigate">Navigation</string>
+
+    <!-- Manager -->
+    <string name="all_orders">Toutes les Commandes</string>
+    <string name="create_order">Créer Commande</string>
+    <string name="order_created">Commande créée avec succès</string>
+
+    <!-- Client -->
+    <string name="my_orders">Mes Commandes</string>
+    <string name="track_order">Suivre</string>
+
+    <!-- Order Details -->
+    <string name="order_details">Détails de la Commande</string>
+    <string name="client_info">Informations Client</string>
+    <string name="restaurant_info">Informations Restaurant</string>
+    <string name="delivery_person">Livreur</string>
+    <string name="items">Articles</string>
+    <string name="total">Total</string>
+    <string name="status">Statut</string>
+
+    <!-- Map -->
+    <string name="tracking">Suivi en temps réel</string>
+    <string name="restaurant_location">Restaurant</string>
+    <string name="client_location">Client</string>
+    <string name="delivery_location">Livreur</string>
 </resources>

@@ -1,12 +1,6 @@
 pluginManagement {
     repositories {
-        google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
-            }
-        }
+        google()
         mavenCentral()
         gradlePluginPortal()
     }
@@ -16,9 +10,15 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://jitpack.io") }
+        // ⭐ ADD THIS ⭐
+        maven { url = uri("https://plugins.gradle.org/m2/")  }
+        maven { url = uri("https://repo.osgeo.org/repository/release/") }
+//        maven { url = uri("https://jitpack.io") }
+        maven { url = uri("https://maven.maptiler.com/repository/maven-public/") }
+        maven { url = uri( "https://maven.maplibre.org/releases") }
     }
 }
 
-rootProject.name = "Project"
+rootProject.name = "Livraison Project"
 include(":app")
- 

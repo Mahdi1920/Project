@@ -1,4 +1,4 @@
-package tn.esprit.project;
+package com.example.project;
 
 import org.junit.Test;
 
