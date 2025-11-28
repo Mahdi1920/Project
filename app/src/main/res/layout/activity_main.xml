@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    ```
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Dar Jeld"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:gravity="center" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cliquez sur un bouton pour envoyer une notification"
+        android:textSize="16sp"
+        android:layout_marginTop="16dp"
+        android:gravity="center" />
+
+    <Button
+        android:id="@+id/btnOrderReady"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Commande prête 🍽️"
+        android:layout_marginTop="20dp" />
+
+    <Button
+        android:id="@+id/btnOrderLate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Commande en retard ⏱️"
+        android:layout_marginTop="20dp" />
+
+    <Button
+        android:id="@+id/btnDish"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Plat du jour 🖼️"
+        android:layout_marginTop="20dp" />
+
+    <Button
+        android:id="@+id/btnVip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="VIP / fidélité ⭐"
+        android:layout_marginTop="20dp" />
+    ```
+
+</LinearLayout>
