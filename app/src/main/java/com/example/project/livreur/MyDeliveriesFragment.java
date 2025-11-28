@@ -78,7 +78,7 @@ public class MyDeliveriesFragment extends Fragment implements OrdersAdapter.OnOr
                         Commande commande = document.toObject(Commande.class);
                         commande.setCommandeId(document.getId());
 
-                        // Only show non-delivered orders
+                        // Only show active deliveries (not delivered or cancelled)
                         if (!commande.getStatus().equals(FirebaseHelper.STATUS_DELIVERED) &&
                                 !commande.getStatus().equals(FirebaseHelper.STATUS_CANCELLED)) {
                             orders.add(commande);
@@ -109,9 +109,11 @@ public class MyDeliveriesFragment extends Fragment implements OrdersAdapter.OnOr
         String currentStatus = commande.getStatus();
         String newStatus;
 
-        if (currentStatus.equals(FirebaseHelper.STATUS_ACCEPTED)) {
+        if (currentStatus.equals(FirebaseHelper.STATUS_LIVREUR_ACCEPTED)) {
+            // Mark as picked up from restaurant
             newStatus = FirebaseHelper.STATUS_PICKED_UP;
         } else if (currentStatus.equals(FirebaseHelper.STATUS_PICKED_UP)) {
+            // Mark as delivered
             newStatus = FirebaseHelper.STATUS_DELIVERED;
         } else {
             return;
@@ -129,8 +131,8 @@ public class MyDeliveriesFragment extends Fragment implements OrdersAdapter.OnOr
                 .set(commande)
                 .addOnSuccessListener(aVoid -> {
                     String message = newStatus.equals(FirebaseHelper.STATUS_PICKED_UP)
-                            ? "Commande récupérée"
-                            : "Commande livrée";
+                            ? "Commande récupérée! En route vers le client"
+                            : "Commande livrée avec succès!";
                     Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
                     loadMyDeliveries();
                 })

@@ -15,10 +15,32 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@color/primary"
         android:elevation="4dp"
-        app:title="Suivi en temps réel"
+        app:title="Navigation"
         app:titleTextColor="@color/white"
         app:navigationIcon="?attr/homeAsUpIndicator"/>
 
+    <!-- Floating Action Buttons for Map Controls -->
+    <LinearLayout
+        android:id="@+id/mapControls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="16dp"
+        android:orientation="vertical">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnCenterMap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:src="@android:drawable/ic_menu_mylocation"
+            app:tint="@color/white"
+            app:backgroundTint="@color/primary"/>
+
+    </LinearLayout>
+
+    <!-- Bottom Info Card -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardOrderInfo"
         android:layout_width="match_parent"
@@ -65,6 +87,16 @@
             </LinearLayout>
 
             <TextView
+                android:id="@+id/tvDistance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Distance: 2.5 km"
+                android:textSize="14sp"
+                android:textColor="@color/primary"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
                 android:id="@+id/tvLivreurName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -77,9 +109,19 @@
                 android:id="@+id/tvLivreurPhone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tel: +216 12 345 678"
+                android:text="Tél: +216 12 345 678"
                 android:textSize="12sp"
-                android:textColor="@color/text_secondary"/>
+                android:textColor="@color/text_secondary"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- Start Navigation Button -->
+            <Button
+                android:id="@+id/btnStartNavigation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Démarrer Navigation"
+                android:textSize="14sp"
+                style="@style/Widget.Material3.Button"/>
 
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

@@ -31,6 +31,8 @@ public class AvailableOrdersFragment extends Fragment implements OrdersAdapter.O
     private ProgressBar progressBar;
     private OrdersAdapter adapter;
     private UserPreferences userPrefs;
+    private List<Commande> availableOrders = new ArrayList<>();
+    private boolean isFirstLoad = true;
 
     @Nullable
     @Override
@@ -48,6 +50,8 @@ public class AvailableOrdersFragment extends Fragment implements OrdersAdapter.O
         tvEmptyState = view.findViewById(R.id.tvEmptyState);
         progressBar = view.findViewById(R.id.progressBar);
 
+        tvEmptyState.setText("Aucune commande disponible pour le moment");
+
         setupRecyclerView();
         loadOrders();
     }
@@ -59,33 +63,50 @@ public class AvailableOrdersFragment extends Fragment implements OrdersAdapter.O
     }
 
     private void loadOrders() {
-        progressBar.setVisibility(View.VISIBLE);
-        tvEmptyState.setVisibility(View.GONE);
+        if (isFirstLoad) {
+            progressBar.setVisibility(View.VISIBLE);
+            tvEmptyState.setVisibility(View.GONE);
+        }
 
-        // Load pending orders
+        // Load ONLY manager-accepted orders (not yet taken by any livreur)
         FirebaseHelper.getCommandesCollection()
-                .whereEqualTo("status", FirebaseHelper.STATUS_PENDING)
+                .whereEqualTo("status", FirebaseHelper.STATUS_MANAGER_ACCEPTED)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    progressBar.setVisibility(View.GONE);
-                    List<Commande> orders = new ArrayList<>();
+                    availableOrders.clear();
 
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         Commande commande = document.toObject(Commande.class);
                         commande.setCommandeId(document.getId());
-                        orders.add(commande);
+
+                        // Double check: ensure no livreurId is assigned
+                        if (commande.getLivreurId() == null || commande.getLivreurId().isEmpty()) {
+                            availableOrders.add(commande);
+                        }
                     }
 
-                    if (orders.isEmpty()) {
-                        tvEmptyState.setVisibility(View.VISIBLE);
-                    } else {
-                        adapter.setOrders(orders);
-                    }
+                    updateUI();
+                    isFirstLoad = false;
                 })
                 .addOnFailureListener(e -> {
                     progressBar.setVisibility(View.GONE);
-                    Toast.makeText(requireContext(), "Erreur: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    tvEmptyState.setVisibility(View.VISIBLE);
+                    tvEmptyState.setText("Erreur: " + e.getMessage());
+                    isFirstLoad = false;
                 });
+    }
+
+    private void updateUI() {
+        progressBar.setVisibility(View.GONE);
+
+        if (availableOrders.isEmpty()) {
+            tvEmptyState.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
+        } else {
+            tvEmptyState.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+            adapter.setOrders(availableOrders);
+        }
     }
 
     @Override
@@ -97,22 +118,32 @@ public class AvailableOrdersFragment extends Fragment implements OrdersAdapter.O
 
     @Override
     public void onActionClick(Commande commande) {
-        // Accept order
+        // Livreur accepts the order
         String livreurId = userPrefs.getUserId();
         String livreurName = userPrefs.getUserName();
         String livreurPhone = userPrefs.getUserPhone();
 
+        if (livreurId == null || livreurName == null) {
+            Toast.makeText(requireContext(), "Erreur: Données livreur incomplètes", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         commande.setLivreurId(livreurId);
         commande.setLivreurName(livreurName);
         commande.setLivreurPhone(livreurPhone);
-        commande.setStatus(FirebaseHelper.STATUS_ACCEPTED);
+        commande.setStatus(FirebaseHelper.STATUS_LIVREUR_ACCEPTED);
         commande.setUpdatedAt(Timestamp.now());
 
         FirebaseHelper.getCommandesCollection()
                 .document(commande.getCommandeId())
                 .set(commande)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(requireContext(), "Commande acceptée", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Commande acceptée! Prêt pour la livraison", Toast.LENGTH_SHORT).show();
+                    // Remove from available list
+                    availableOrders.remove(commande);
+                    updateUI();
+
+                    // Refresh in case another livreur took it
                     loadOrders();
                 })
                 .addOnFailureListener(e -> {
@@ -123,6 +154,7 @@ public class AvailableOrdersFragment extends Fragment implements OrdersAdapter.O
     @Override
     public void onResume() {
         super.onResume();
+        // Reload available orders when returning to this fragment
         loadOrders();
     }
 }

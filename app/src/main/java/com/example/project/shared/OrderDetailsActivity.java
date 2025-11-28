@@ -5,7 +5,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -64,7 +63,9 @@ public class OrderDetailsActivity extends AppCompatActivity {
         btnNavigate = findViewById(R.id.btnNavigate);
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
         toolbar.setNavigationOnClickListener(v -> finish());
 
         adapter = new OrderItemsAdapter(null);
@@ -90,7 +91,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
     }
 
     private void displayOrderDetails() {
-        tvOrderId.setText("CMD-" + commande.getCommandeId().substring(0, 8));
+        tvOrderId.setText("CMD-" + commande.getCommandeId().substring(0, Math.min(8, commande.getCommandeId().length())));
 
         // Status
         String status = commande.getStatus();
@@ -107,61 +108,49 @@ public class OrderDetailsActivity extends AppCompatActivity {
         tvClientAddress.setText(commande.getClientAddress());
 
         // Delivery person info
-        if (commande.getLivreurName() != null) {
+        if (commande.getLivreurName() != null && !commande.getLivreurName().isEmpty()) {
             cardDeliveryPerson.setVisibility(View.VISIBLE);
             tvLivreurName.setText(commande.getLivreurName());
             tvLivreurPhone.setText(commande.getLivreurPhone());
         }
 
         // Items
-        adapter.setItems(commande.getItems());
+        if (commande.getItems() != null) {
+            adapter.setItems(commande.getItems());
+        }
 
         // Total
         tvTotalPrice.setText(String.format("Total: %.2f DT", commande.getTotalPrice()));
 
-        // Navigate button (only for livreur)
+        // Navigate button - Show ONLY for livreur when order is accepted or picked up
         String userType = userPrefs.getUserType();
-        if (userType.equals(FirebaseHelper.USER_TYPE_LIVREUR) &&
-                (status.equals(FirebaseHelper.STATUS_ACCEPTED) || status.equals(FirebaseHelper.STATUS_PICKED_UP))) {
-            btnNavigate.setVisibility(View.VISIBLE);
-            btnNavigate.setOnClickListener(v -> openNavigation());
+        if (userType != null && userType.equals(FirebaseHelper.USER_TYPE_LIVREUR)) {
+            if (status.equals(FirebaseHelper.STATUS_LIVREUR_ACCEPTED) ||
+                    status.equals(FirebaseHelper.STATUS_PICKED_UP)) {
+                btnNavigate.setVisibility(View.VISIBLE);
+                btnNavigate.setOnClickListener(v -> openMapNavigation());
+            } else {
+                btnNavigate.setVisibility(View.GONE);
+            }
+        } else {
+            btnNavigate.setVisibility(View.GONE);
         }
     }
 
-    private void openNavigation() {
-        double lat = commande.getClientLatitude();
-        double lng = commande.getClientLongitude();
-
-        String uri = "geo:" + lat + "," + lng + "?q=" + lat + "," + lng;
-
-        // --- Try Organic Maps ---
-        Intent organicIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
-        organicIntent.setPackage("app.organicmaps");
-        if (organicIntent.resolveActivity(getPackageManager()) != null) {
-            startActivity(organicIntent);
-            return;
-        }
-
-        // --- Try OsmAnd ---
-        Intent osmandIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
-        osmandIntent.setPackage("net.osmand");
-        if (osmandIntent.resolveActivity(getPackageManager()) != null) {
-            startActivity(osmandIntent);
-            return;
-        }
-
-        // --- Fallback: open browser with OpenStreetMap directions ---
-        String browserUrl = "https://www.openstreetmap.org/directions?to=" + lat + "%2C" + lng;
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(browserUrl));
-        startActivity(browserIntent);
+    private void openMapNavigation() {
+        // Open MapTrackingActivity with in-app navigation
+        Intent intent = new Intent(this, MapTrackingActivity.class);
+        intent.putExtra("commandeId", commande.getCommandeId());
+        startActivity(intent);
     }
-
 
     private String getStatusText(String status) {
         switch (status) {
             case FirebaseHelper.STATUS_PENDING:
                 return "En attente";
-            case FirebaseHelper.STATUS_ACCEPTED:
+            case FirebaseHelper.STATUS_MANAGER_ACCEPTED:
+                return "Acceptée par manager";
+            case FirebaseHelper.STATUS_LIVREUR_ACCEPTED:
                 return "Acceptée";
             case FirebaseHelper.STATUS_PICKED_UP:
                 return "Récupérée";
@@ -178,10 +167,12 @@ public class OrderDetailsActivity extends AppCompatActivity {
         switch (status) {
             case FirebaseHelper.STATUS_PENDING:
                 return Color.parseColor("#FF9800");
-            case FirebaseHelper.STATUS_ACCEPTED:
+            case FirebaseHelper.STATUS_MANAGER_ACCEPTED:
                 return Color.parseColor("#2196F3");
-            case FirebaseHelper.STATUS_PICKED_UP:
+            case FirebaseHelper.STATUS_LIVREUR_ACCEPTED:
                 return Color.parseColor("#9C27B0");
+            case FirebaseHelper.STATUS_PICKED_UP:
+                return Color.parseColor("#FF5722");
             case FirebaseHelper.STATUS_DELIVERED:
                 return Color.parseColor("#4CAF50");
             case FirebaseHelper.STATUS_CANCELLED:

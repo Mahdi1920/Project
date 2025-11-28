@@ -17,51 +17,18 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/select_user_type"
+        android:text="Sélectionner votre rôle"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="@color/text_primary"
         android:layout_marginBottom="48dp"/>
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardLivreur"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="4dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?attr/selectableItemBackground">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="20dp"
-            android:gravity="center_vertical">
-
-            <View
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="@color/livreur_color"
-                android:layout_marginEnd="16dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/livreur"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_primary"/>
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
+    <!-- Manager Card -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardManager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="24dp"
         app:cardCornerRadius="12dp"
         app:cardElevation="4dp"
         android:clickable="true"
@@ -71,28 +38,38 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="20dp"
-            android:gravity="center_vertical">
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:gravity="center">
 
             <View
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
                 android:background="@color/manager_color"
-                android:layout_marginEnd="16dp"/>
+                android:layout_marginBottom="16dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/manager"
-                android:textSize="18sp"
+                android:text="Manager Restaurant"
+                android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="@color/text_primary"/>
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Gérer les commandes et accepter les livraisons"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:gravity="center"/>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
+    <!-- Livreur Card -->
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardClient"
+        android:id="@+id/cardLivreur"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardCornerRadius="12dp"
@@ -104,23 +81,32 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="20dp"
-            android:gravity="center_vertical">
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:gravity="center">
 
             <View
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="@color/client_color"
-                android:layout_marginEnd="16dp"/>
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:background="@color/livreur_color"
+                android:layout_marginBottom="16dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/client"
-                android:textSize="18sp"
+                android:text="Livreur"
+                android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="@color/text_primary"/>
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Accepter et livrer les commandes"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:gravity="center"/>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 

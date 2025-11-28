@@ -14,17 +14,18 @@ import com.example.project.utils.FirebaseHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewHolder> {
+public class ManagerOrdersAdapter extends RecyclerView.Adapter<ManagerOrdersAdapter.ViewHolder> {
 
     private List<Commande> orders = new ArrayList<>();
-    private OnOrderClickListener listener;
+    private OnOrderActionListener listener;
 
-    public interface OnOrderClickListener {
+    public interface OnOrderActionListener {
         void onOrderClick(Commande commande);
-        void onActionClick(Commande commande);
+        void onAcceptOrder(Commande commande);
+        void onRejectOrder(Commande commande);
     }
 
-    public OrdersAdapter(OnOrderClickListener listener) {
+    public ManagerOrdersAdapter(OnOrderActionListener listener) {
         this.listener = listener;
     }
 
@@ -35,13 +36,13 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
 
     @NonNull
     @Override
-    public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_order, parent, false);
-        return new OrderViewHolder(view);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_manager_order, parent, false);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Commande commande = orders.get(position);
         holder.bind(commande);
     }
@@ -51,24 +52,23 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
         return orders.size();
     }
 
-    class OrderViewHolder extends RecyclerView.ViewHolder {
-        TextView tvOrderId, tvStatus, tvRestaurantName, tvClientName, tvClientAddress, tvTotalPrice;
-        Button btnAction;
+    class ViewHolder extends RecyclerView.ViewHolder {
+        TextView tvOrderId, tvStatus, tvClientName, tvClientAddress, tvTotalPrice;
+        Button btnAccept, btnReject;
 
-        public OrderViewHolder(@NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvOrderId = itemView.findViewById(R.id.tvOrderId);
             tvStatus = itemView.findViewById(R.id.tvStatus);
-            tvRestaurantName = itemView.findViewById(R.id.tvRestaurantName);
             tvClientName = itemView.findViewById(R.id.tvClientName);
             tvClientAddress = itemView.findViewById(R.id.tvClientAddress);
             tvTotalPrice = itemView.findViewById(R.id.tvTotalPrice);
-            btnAction = itemView.findViewById(R.id.btnAction);
+            btnAccept = itemView.findViewById(R.id.btnAccept);
+            btnReject = itemView.findViewById(R.id.btnReject);
         }
 
         public void bind(Commande commande) {
             tvOrderId.setText("CMD-" + commande.getCommandeId().substring(0, Math.min(8, commande.getCommandeId().length())));
-            tvRestaurantName.setText(commande.getRestaurantName());
             tvClientName.setText(commande.getClientName());
             tvClientAddress.setText(commande.getClientAddress());
             tvTotalPrice.setText(String.format("%.2f DT", commande.getTotalPrice()));
@@ -78,36 +78,27 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
             tvStatus.setText(getStatusText(status));
             tvStatus.setBackgroundColor(getStatusColor(status));
 
-            // Set button based on status
-            setupActionButton(commande);
+            // Show buttons only for pending orders
+            if (status.equals(FirebaseHelper.STATUS_PENDING)) {
+                btnAccept.setVisibility(View.VISIBLE);
+                btnReject.setVisibility(View.VISIBLE);
+            } else {
+                btnAccept.setVisibility(View.GONE);
+                btnReject.setVisibility(View.GONE);
+            }
 
             // Click listeners
             itemView.setOnClickListener(v -> {
                 if (listener != null) listener.onOrderClick(commande);
             });
-            btnAction.setOnClickListener(v -> {
-                if (listener != null) listener.onActionClick(commande);
+
+            btnAccept.setOnClickListener(v -> {
+                if (listener != null) listener.onAcceptOrder(commande);
             });
-        }
 
-        private void setupActionButton(Commande commande) {
-            String status = commande.getStatus();
-
-            if (status.equals(FirebaseHelper.STATUS_MANAGER_ACCEPTED)) {
-                // Available for livreur to accept
-                btnAction.setText("Accepter Livraison");
-                btnAction.setVisibility(View.VISIBLE);
-            } else if (status.equals(FirebaseHelper.STATUS_LIVREUR_ACCEPTED)) {
-                // Livreur accepted, now can mark as picked up
-                btnAction.setText("Récupéré");
-                btnAction.setVisibility(View.VISIBLE);
-            } else if (status.equals(FirebaseHelper.STATUS_PICKED_UP)) {
-                // Can now deliver
-                btnAction.setText("Livrer");
-                btnAction.setVisibility(View.VISIBLE);
-            } else {
-                btnAction.setVisibility(View.GONE);
-            }
+            btnReject.setOnClickListener(v -> {
+                if (listener != null) listener.onRejectOrder(commande);
+            });
         }
 
         private String getStatusText(String status) {
@@ -115,11 +106,11 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
                 case FirebaseHelper.STATUS_PENDING:
                     return "En attente";
                 case FirebaseHelper.STATUS_MANAGER_ACCEPTED:
-                    return "Disponible";
+                    return "Acceptée (En attente livreur)";
                 case FirebaseHelper.STATUS_LIVREUR_ACCEPTED:
-                    return "Acceptée";
+                    return "Livreur assigné";
                 case FirebaseHelper.STATUS_PICKED_UP:
-                    return "Récupérée";
+                    return "En cours de livraison";
                 case FirebaseHelper.STATUS_DELIVERED:
                     return "Livrée";
                 case FirebaseHelper.STATUS_CANCELLED:
@@ -132,17 +123,17 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
         private int getStatusColor(String status) {
             switch (status) {
                 case FirebaseHelper.STATUS_PENDING:
-                    return Color.parseColor("#FF9800");
+                    return Color.parseColor("#FF9800"); // Orange
                 case FirebaseHelper.STATUS_MANAGER_ACCEPTED:
-                    return Color.parseColor("#2196F3");
+                    return Color.parseColor("#2196F3"); // Blue
                 case FirebaseHelper.STATUS_LIVREUR_ACCEPTED:
-                    return Color.parseColor("#9C27B0");
+                    return Color.parseColor("#9C27B0"); // Purple
                 case FirebaseHelper.STATUS_PICKED_UP:
-                    return Color.parseColor("#FF5722");
+                    return Color.parseColor("#FF5722"); // Deep Orange
                 case FirebaseHelper.STATUS_DELIVERED:
-                    return Color.parseColor("#4CAF50");
+                    return Color.parseColor("#4CAF50"); // Green
                 case FirebaseHelper.STATUS_CANCELLED:
-                    return Color.parseColor("#F44336");
+                    return Color.parseColor("#F44336"); // Red
                 default:
                     return Color.GRAY;
             }

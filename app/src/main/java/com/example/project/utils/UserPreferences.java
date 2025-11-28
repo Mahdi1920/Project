@@ -19,11 +19,28 @@ public class UserPreferences {
         editor = prefs.edit();
     }
 
+    // Save user data all-in-one
     public void saveUser(String userId, String userName, String userType, String userPhone) {
         editor.putString(KEY_USER_ID, userId);
         editor.putString(KEY_USER_NAME, userName);
         editor.putString(KEY_USER_TYPE, userType);
         editor.putString(KEY_USER_PHONE, userPhone);
+        editor.apply();
+    }
+
+    // New setters requested
+    public void setUserName(String name) {
+        editor.putString(KEY_USER_NAME, name);
+        editor.apply();
+    }
+
+    public void setUserPhone(String phone) {
+        editor.putString(KEY_USER_PHONE, phone);
+        editor.apply();
+    }
+
+    public void setUserType(String type) {
+        editor.putString(KEY_USER_TYPE, type);
         editor.apply();
     }
 

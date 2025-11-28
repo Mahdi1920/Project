@@ -13,7 +13,6 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -43,14 +42,15 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-database")
 
-    // MapLibre (free OSM-based maps - alternative to Google Maps)
+    // MapLibre
     implementation("org.maplibre.gl:android-sdk:11.0.0")
 
-    // RecyclerView
+    // Required for location
+    implementation("com.google.android.gms:play-services-location:21.2.0")
+
+    implementation("com.android.volley:volley:1.2.1")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.cardview:cardview:1.0.0")
-
-    // ViewPager2
     implementation("androidx.viewpager2:viewpager2:1.0.0")
 
     testImplementation("junit:junit:4.13.2")
