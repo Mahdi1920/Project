@@ -1,5 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <!-- Couleurs de base -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- 🎨 Palette Bleu (Primary) -->
+    <color name="primary">#2B4787</color>        <!-- Bleu principal -->
+    <color name="primary_dark">#000829</color>   <!-- Bleu foncé -->
+    <color name="primary_light">#587BDB</color>  <!-- Bleu clair -->
+    <color name="purple_500">#9C27B0</color>   <!-- violet -->
+    <color name="teal_200">#80CBC4</color>
+    <!-- 🎨 Palette Jaune (Accent) -->
+    <color name="accent">#C2A02F</color>         <!-- Jaune principal -->
+    <color name="accent_dark">#FFA000</color>    <!-- Jaune foncé -->
+    <color name="accent_light">#EBE531</color>   <!-- Jaune clair -->
+
+    <!-- UI Neutre -->
+    <color name="background">#F9F9F9</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <!-- Ligne / Bordure -->
+    <color name="divider">#E0E0E0</color>
+
 </resources>

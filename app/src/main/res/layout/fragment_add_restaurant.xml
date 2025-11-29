@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#FAFAFA">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- 🔙 Bouton Retour -->
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Retour"
+            android:backgroundTint="@color/primary_dark"
+            android:textColor="@color/white"
+            android:padding="8dp"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- 🖼 Image Cover -->
+        <ImageView
+            android:id="@+id/ivCover"
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/bgcover"
+            android:background="#CCCCCC"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- 🏷 Nom restaurant -->
+        <EditText
+            android:id="@+id/etName"
+            android:textColor="@android:color/black"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nom du restaurant"
+            android:textColorHint="@color/text_secondary"
+            android:padding="12dp"
+            android:background="@drawable/bg_input"/>
+
+
+        <AutoCompleteTextView
+            android:id="@+id/etAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Adresse du restaurant"
+            android:padding="12dp"
+            android:textColorHint="@color/text_secondary"
+
+            android:layout_marginTop="10dp"
+            android:textColor="@android:color/black"
+            android:background="@drawable/bg_input"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewSuggestions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+
+            android:layout_marginTop="4dp"/>
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Catégorie"
+            android:textColor="@color/black"
+            android:layout_marginTop="12dp"
+            android:textStyle="bold"/>
+
+        <Spinner
+            android:id="@+id/spinnerCategory"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:padding="8dp"
+            android:textColorHint="@android:color/black"
+
+            android:textColor="@android:color/black"
+            android:background="@drawable/bg_spinner"
+            android:spinnerMode="dropdown" />
+
+        <Button
+            android:id="@+id/btnSelectImage"
+            android:layout_width="181dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/accent_dark"
+            android:elevation="4dp"
+            android:fontFamily="sans-serif-medium"
+            android:stateListAnimator="@null"
+            android:text="Choisir un logo"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+
+
+
+        <ImageView
+            android:id="@+id/ivLogo"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_marginTop="10dp"
+            android:scaleType="centerCrop"
+            android:background="#E0E0E0"
+            android:src="@drawable/ic_launcher_background"/>
+
+        <Button
+            android:id="@+id/btnAdd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ajouter"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="@color/primary_dark"
+            android:textColor="#FFFFFF"/>
+    </LinearLayout>
+</ScrollView>
