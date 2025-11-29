@@ -21,7 +21,7 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    private val restaurantName = "Mon Restaurant 🍴" // Nom affiché dans toutes les notifications
+    private val restaurantName = "Mon Restaurant 🍴"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,22 +34,17 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnOrderLate).setOnClickListener { showOrderLateNotification() }
         findViewById<Button>(R.id.btnDish).setOnClickListener { showDishPopup() }
         findViewById<Button>(R.id.btnVip).setOnClickListener { showVipNotification() }
+        findViewById<Button>(R.id.btnDelivery).setOnClickListener { showDeliveryNotification() }
 
         scheduleDailyDishRecommendation()
     }
 
     private fun askNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ActivityCompat.checkSelfPermission(
-                    this,
-                    android.Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
             ) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
-                    100
-                )
+                ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 100)
             }
         }
     }
@@ -57,20 +52,23 @@ class MainActivity : AppCompatActivity() {
     private fun createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val manager = getSystemService(NotificationManager::class.java)
+            val attributes = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).build()
 
+            // Commande prête
             val orderChannel = NotificationChannel("order_channel", "Commandes", NotificationManager.IMPORTANCE_HIGH)
             orderChannel.enableLights(true)
             orderChannel.lightColor = Color.GREEN
             manager?.createNotificationChannel(orderChannel)
 
+            // Retard
             val lateChannel = NotificationChannel("late_channel", "Retards", NotificationManager.IMPORTANCE_HIGH)
             lateChannel.enableLights(true)
             lateChannel.lightColor = Color.RED
             val alertSound = Uri.parse("android.resource://${packageName}/raw/alert_sound")
-            val attributes = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).build()
             lateChannel.setSound(alertSound, attributes)
             manager?.createNotificationChannel(lateChannel)
 
+            // Promotions
             val promoChannel = NotificationChannel("promo_channel", "Promotions", NotificationManager.IMPORTANCE_HIGH)
             promoChannel.enableLights(true)
             promoChannel.lightColor = Color.parseColor("#FFA500")
@@ -78,6 +76,7 @@ class MainActivity : AppCompatActivity() {
             promoChannel.setSound(promoSound, attributes)
             manager?.createNotificationChannel(promoChannel)
 
+            // VIP
             val vipChannel = NotificationChannel("vip_channel", "VIP / fidélité", NotificationManager.IMPORTANCE_HIGH)
             vipChannel.enableLights(true)
             vipChannel.lightColor = Color.MAGENTA
@@ -86,6 +85,12 @@ class MainActivity : AppCompatActivity() {
             val vipSound = Uri.parse("android.resource://${packageName}/raw/vip_sound")
             vipChannel.setSound(vipSound, attributes)
             manager?.createNotificationChannel(vipChannel)
+
+            // Livraison
+            val deliveryChannel = NotificationChannel("delivery_channel", "Livraison", NotificationManager.IMPORTANCE_HIGH)
+            deliveryChannel.enableLights(true)
+            deliveryChannel.lightColor = Color.BLUE
+            manager?.createNotificationChannel(deliveryChannel)
         }
     }
 
@@ -114,9 +119,7 @@ class MainActivity : AppCompatActivity() {
     private fun showDishNotification(dish: String = "Découvrez notre plat du jour !") {
         val bitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher)
         val intent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
         val notification = NotificationCompat.Builder(this, "promo_channel")
             .setSmallIcon(R.mipmap.ic_launcher)
@@ -142,6 +145,17 @@ class MainActivity : AppCompatActivity() {
         NotificationManagerCompat.from(this).notify(304, notification)
     }
 
+    private fun showDeliveryNotification() {
+        val notification = NotificationCompat.Builder(this, "delivery_channel")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle("$restaurantName - Livraison 🚚")
+            .setContentText("Votre commande est en route et sera bientôt livrée !")
+            .setColor(Color.BLUE)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .build()
+        NotificationManagerCompat.from(this).notify(305, notification)
+    }
+
     private fun showDishPopup() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Plat du jour 🍽️")
@@ -150,11 +164,8 @@ class MainActivity : AppCompatActivity() {
             showDishNotification("Poulet rôti avec légumes")
             dialog.dismiss()
         }
-        builder.setNegativeButton("Annuler") { dialog, _ ->
-            dialog.dismiss()
-        }
-        val dialog = builder.create()
-        dialog.show()
+        builder.setNegativeButton("Annuler") { dialog, _ -> dialog.dismiss() }
+        builder.create().show()
     }
 
     internal fun sendDishRecommendationNotification() {
@@ -168,9 +179,7 @@ class MainActivity : AppCompatActivity() {
         val recommendedDish = dishes.random()
 
         val intent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
         val notification = NotificationCompat.Builder(this, "promo_channel")
             .setSmallIcon(R.mipmap.ic_launcher)
@@ -192,22 +201,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         val intent = Intent(this, DishRecommendationReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(
-            this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
+        val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.setRepeating(
-            AlarmManager.RTC_WAKEUP,
-            calendar.timeInMillis,
-            AlarmManager.INTERVAL_DAY,
-            pendingIntent
-        )
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, AlarmManager.INTERVAL_DAY, pendingIntent)
     }
+
 
 }
 
-// Classe BroadcastReceiver correctement déclarée après MainActivity
 class DishRecommendationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         context?.let {
@@ -220,11 +221,9 @@ class DishRecommendationReceiver : BroadcastReceiver() {
             )
             val recommendedDish = dishes.random()
 
+
             val intentMain = Intent(context, MainActivity::class.java)
-            val pendingIntent = PendingIntent.getActivity(
-                context, 0, intentMain,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
+            val pendingIntent = PendingIntent.getActivity(context, 0, intentMain, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
             val notification = NotificationCompat.Builder(context, "promo_channel")
                 .setSmallIcon(R.mipmap.ic_launcher)
