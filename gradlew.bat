@@ -72,6 +72,9 @@ goto fail
 
 set CLASSPATH=
 
+@rem --- ensure CLASSPATH is not empty to avoid `-classpath ""` which Java rejects ---
+if "%CLASSPATH%"=="" set CLASSPATH=.
+@rem -------------------------------------------------------------------------------
 
 @rem Execute Gradle
 "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" -jar "%APP_HOME%\gradle\wrapper\gradle-wrapper.jar" %*

@@ -1,3 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Project</string>
+    <string name="app_name">Food Delivery</string>
+    <string name="restaurants_list_placeholder">Restaurants list will be shown here</string>
+    <string name="view_cart">Voir panier</string>
+    <string name="profile">Profil</string>
+    <string name="menu_placeholder">Menu for restaurant will be shown here</string>
+    <string name="cart_placeholder">Cart items will be shown here</string>
+    <string name="total_placeholder">Total: 0 DT</string>
+    <string name="confirm_order">Confirmer la commande</string>
+    <string name="profile_title">Profil utilisateur</string>
+    <string name="hint_name">Nom</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_address">Adresse</string>
+    <string name="save">Sauvegarder</string>
+    <string name="status_pending">Statut: PENDING</string>
+    <string name="status_format">Statut: %1$s</string>
+    <string name="avatar">Avatar</string>
+    <string name="open_cart">Ouvrir le panier</string>
+    <string name="modifier">Modifier</string>
+    <string name="restaurants">Restaurants</string>
+    <string name="commandes">Commandes</string>
+    <string name="profil">Profil</string>
+
+    <!-- Added for navigation drawer accessibility -->
+    <string name="navigation_drawer_open">Ouvrir le menu</string>
+    <string name="navigation_drawer_close">Fermer le menu</string>
+
+    <!-- Drawer header placeholders -->
+    <string name="drawer_user_name">Utilisateur</string>
+    <string name="drawer_user_email">user@example.com</string>
+    <string name="drawer_avatar_desc">Avatar</string>
+
+    <!-- Toolbar menu -->
+    <string name="menu_profile">Profil</string>
+    <string name="menu_about">À propos</string>
+    <string name="added_to_cart">Ajouté au panier</string>
+    <string name="action_profile">Profil</string>
+    <string name="action_about">À propos</string>
+    <string name="action_cart">Panier</string>
+    <string name="add">Add</string>
+    <string name="add_to_cart">Add To Cart</string>
+    <string name="item_name">Item name</string>
+
+    <!-- strings for sandwich customization -->
+    <string name="customize_title">Composer Votre Sandwich</string>
+    <string name="choose_ingredients">Choisissez les ingrédients:</string>
+    <string name="onion">Oignon</string>
+    <string name="caramelized_onion">Oignon caramélisé</string>
+    <string name="harissa">Harissa</string>
+    <string name="tomato">Tomate</string>
+    <string name="quantity">Quantité:</string>
+    <string name="minus">-</string>
+    <string name="plus">+</string>
+    <string name="cancel">Annuler</string>
+    <string name="add_to_cart_french">Ajouter au panier</string>
+    <string name="personnaliser_sandwich_id">"Composer Votre Sandwich : "</string>
+
+    <!-- Order UI strings -->
+    <string name="timeline">Timeline</string>
+    <string name="view_on_map">Voir sur la carte</string>
+    <string name="order_item_name_cd">Order item name</string>
+    <string name="order_item_qty_cd">Order item quantity</string>
+    <string name="order_item_price_cd">Order item price</string>
+    <string name="change_status">Changer le statut</string>
+    <string name="status_unknown">UNKNOWN</string>
+    <string name="order_number_format">Commande #%1$d</string>
+    <string name="order_price_format">%1$.2f TND</string>
+    <string name="order_status_prefix">Statut: %1$s</string>
+    <string name="order_details_title">Order #%1$d status history</string>
+    <string name="show_on_map">Afficher sur la carte</string>
+    <string name="btn_cancel">Annuler</string>
 </resources>

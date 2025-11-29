@@ -1,0 +1,153 @@
+package tn.esprit.project.utils;
+
+import android.content.Context;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.room.Database;
+import androidx.room.Room;
+import androidx.room.RoomDatabase;
+import androidx.sqlite.db.SupportSQLiteDatabase;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import tn.esprit.project.dao.CartDAO;
+import tn.esprit.project.dao.MenuItemDAO;
+import tn.esprit.project.dao.MenuDAO;
+import tn.esprit.project.dao.OrderDAO;
+import tn.esprit.project.dao.RestaurantDAO;
+import tn.esprit.project.dao.UserDAO;
+import tn.esprit.project.dao.OrderStatusDAO;
+import tn.esprit.project.dao.FavoriteDAO;
+
+import tn.esprit.project.models.CartItem;
+import tn.esprit.project.models.MenuItem;
+import tn.esprit.project.models.Menu;
+import tn.esprit.project.models.Order;
+import tn.esprit.project.models.OrderItem;
+import tn.esprit.project.models.Restaurant;
+import tn.esprit.project.models.User;
+import tn.esprit.project.models.OrderStatusUpdate;
+import tn.esprit.project.models.Favorite;
+
+// Increment version to force destructive migration when schema changes
+@Database(entities = {Restaurant.class, User.class, Menu.class, MenuItem.class, CartItem.class, Order.class, OrderItem.class, OrderStatusUpdate.class, Favorite.class}, version = 5, exportSchema = false)
+public abstract class AppDatabase extends RoomDatabase {
+
+    private static final String TAG = "AppDatabase";
+
+    private static volatile AppDatabase INSTANCE = null;
+
+    public abstract UserDAO userDAO();
+    public abstract RestaurantDAO restaurantDAO();
+    public abstract MenuItemDAO menuItemDAO();
+    public abstract MenuDAO menuDAO();
+    public abstract CartDAO cartDAO();
+    public abstract OrderDAO orderDAO();
+    public abstract OrderStatusDAO orderStatusDAO();
+    public abstract FavoriteDAO favoriteDAO();
+
+    // Single thread executor for DB pre-population
+    private static final ExecutorService databaseWriteExecutor = Executors.newSingleThreadExecutor();
+
+    public static AppDatabase getInstance(Context context) {
+        if (INSTANCE == null) {
+            synchronized (AppDatabase.class) {
+                if (INSTANCE == null) {
+                    // Use application context to avoid leaking an Activity
+                    Context appContext = context.getApplicationContext();
+                    INSTANCE = Room
+                            .databaseBuilder(
+                                    appContext,
+                                    AppDatabase.class, "FoodDeliveryDb")
+                            //.addMigrations(MIGRATION_4_5)
+                            .addCallback(sRoomDatabaseCallback)
+                            .allowMainThreadQueries()
+                            // If you prefer destructive migration during dev uncomment next line
+                            //.fallbackToDestructiveMigration()
+                            .build();
+                }
+            }
+        }
+        return INSTANCE;
+    }
+
+    // Migration 4 -> 5: add avatar_url column to users table
+//    private static final androidx.room.migration.Migration MIGRATION_4_5 = new androidx.room.migration.Migration(4, 5) {
+//        @Override
+//        public void migrate(@NonNull SupportSQLiteDatabase database) {
+//            // add avatar_url column with default empty string
+//            database.execSQL("ALTER TABLE users ADD COLUMN avatar_url TEXT DEFAULT ''");
+//        }
+//    };
+
+    // Callback pour pré-peupler la base lors de sa création
+    private static RoomDatabase.Callback sRoomDatabaseCallback = new RoomDatabase.Callback() {
+        @Override
+        public void onCreate(@NonNull SupportSQLiteDatabase db) {
+            super.onCreate(db);
+
+            Log.d(TAG, "onCreate: database created — starting pre-population");
+
+            // Insérer des données d'exemple via SQL direct pour éviter d'utiliser des DAO pendant onCreate
+            databaseWriteExecutor.execute(() -> {
+                try {
+                    // Utilisateur exemple (id auto gen)
+                    db.execSQL("INSERT INTO users (name, email, address, phoneNumber, status) VALUES ('Mahdi Chabbouh','mahdichabbouh98@gmail.com','Soukra','+2128249582','ENABLED','@mipmap/profile_round')");
+
+                    // Restaurants
+                    db.execSQL("INSERT INTO restaurants (name, address, phone_number, image_url) VALUES ('Pizzeria Roma','123 Main St','+21612345678','@drawable/pizza')"); // Example with local image
+                    db.execSQL("INSERT INTO restaurants (name, address, phone_number, image_url) VALUES ('Sushi House','45 Ocean Ave','+21687654321','@drawable/sushi')");
+                    db.execSQL("INSERT INTO restaurants (name, address, phone_number, image_url) VALUES ('Tunisian Delights','7 Medina Rd','+21611223344','@drawable/tunisian')");
+
+                    // Menus: for each restaurant create menus (ids will be autogenerated starting at 1)
+                    // For restaurant 1 (Pizzeria Roma)
+                    db.execSQL("INSERT INTO menus (restaurant_id, name, description, image_url) VALUES (1,'Pizzas','All kinds of pizzas','@drawable/pizza_roma')");
+                    db.execSQL("INSERT INTO menus (restaurant_id, name, description, image_url) VALUES (1,'Sandwiches','Fresh sandwiches','@drawable/sandwich')");
+                    db.execSQL("INSERT INTO menus (restaurant_id, name, description, image_url) VALUES (1,'Plats','Main dishes','@drawable/plat')");
+
+                    // For restaurant 2 (Sushi House)
+                    db.execSQL("INSERT INTO menus (restaurant_id, name, description, image_url) VALUES (2,'Sushi','Assorted sushi','@drawable/assorted_sushi')");
+                    db.execSQL("INSERT INTO menus (restaurant_id, name, description, image_url) VALUES (2,'Rolls','Special rolls','@drawable/special_rolls')");
+
+                    // For restaurant 3 (Tunisian Delights)
+                    db.execSQL("INSERT INTO menus (restaurant_id, name, description, image_url) VALUES (3,'Starters','Traditional starters','')");
+                    db.execSQL("INSERT INTO menus (restaurant_id, name, description, image_url) VALUES (3,'Main','Couscous and more','')");
+
+                    // Menu items referencing menu_id (we assume insertion order maps ids sequentially)
+                    // Pizzas menu (menu_id = 1)
+                    db.execSQL("INSERT INTO menu_items (menu_id, name, description, price, image_url) VALUES (1,'Margherita','Classic tomato & cheese',6.5,'')");
+                    db.execSQL("INSERT INTO menu_items (menu_id, name, description, price, image_url) VALUES (1,'Neptune','Seafood pizza',8.5,'')");
+                    db.execSQL("INSERT INTO menu_items (menu_id, name, description, price, image_url) VALUES (1,'4 Saisons','Mixed toppings',8.0,'')");
+
+                    // Sandwiches menu (menu_id = 2)
+                    db.execSQL("INSERT INTO menu_items (menu_id, name, description, price, image_url) VALUES (2,'Club Sandwich','Chicken, lettuce, tomato',5.5,'')");
+                    db.execSQL("INSERT INTO menu_items (menu_id, name, description, price, image_url) VALUES (2,'Veggie Sandwich','Fresh veggies',4.5,'')");
+
+                    // Plats menu (menu_id = 3)
+                    db.execSQL("INSERT INTO menu_items (menu_id, name, description, price, image_url) VALUES (3,'Lasagna','Baked lasagna',9.0,'')");
+
+                    // Sushi House menus: menu_id = 4 and 5
+                    db.execSQL("INSERT INTO menu_items (menu_id, name, description, price, image_url) VALUES (4,'California Roll','Crab, avocado',5.0,'')");
+                    db.execSQL("INSERT INTO menu_items (menu_id, name, description, price, image_url) VALUES (4,'Salmon Nigiri','Fresh salmon',4.0,'')");
+                    db.execSQL("INSERT INTO menu_items (menu_id, name, description, price, image_url) VALUES (5,'Spicy Roll','Spicy tuna roll',6.0,'')");
+
+                    // Tunisian Delights menus: menu_id = 6 and 7
+                    db.execSQL("INSERT INTO menu_items (menu_id, name, description, price, image_url) VALUES (6,'Brik','Tunisian pastry with egg',3.0,'')");
+                    db.execSQL("INSERT INTO menu_items (menu_id, name, description, price, image_url) VALUES (7,'Couscous','Traditional couscous',8.0,'')");
+
+                    //db.execSQL("INSERT INTO OrderStatusUpdate (order_id, status, timestamp, latitude, longitude) VALUES (1, 'PENDING', '2025-11-28T10:00:00Z', 14.6937, -17.44406)");
+                    //db.execSQL("INSERT INTO OrderStatusUpdate (order_id, status, timestamp, latitude, longitude) VALUES (1, 'PREPARING', '2025-11-28T10:05:00Z', 14.6940, -17.44450)");
+                    //db.execSQL("INSERT INTO OrderStatusUpdate (order_id, status, timestamp, latitude, longitude) VALUES (1, 'OUT_FOR_DELIVERY', '2025-11-28T10:20:00Z', 14.6950, -17.44500)");
+                    //db.execSQL("INSERT INTO OrderStatusUpdate (order_id, status, timestamp, latitude, longitude) VALUES (1, 'DELIVERED', '2025-11-28T10:30:00Z', 14.6960, -17.44600)");
+
+
+                    Log.d(TAG, "Pre-population completed successfully");
+                } catch (Exception e) {
+                    Log.e(TAG, "Pre-population failed", e);
+                }
+            });
+        }
+    };
+}

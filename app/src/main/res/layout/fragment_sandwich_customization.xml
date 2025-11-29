@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tv_customize_item_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/customize_title"
+            android:textSize="18dp"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:paddingBottom="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/choose_ingredients"/>
+
+        <CheckBox
+            android:id="@+id/cb_onion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/onion"/>
+
+        <CheckBox
+            android:id="@+id/cb_caramelized"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/caramelized_onion"/>
+
+        <CheckBox
+            android:id="@+id/cb_harissa"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/harissa"/>
+
+        <CheckBox
+            android:id="@+id/cb_tomato"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tomato"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/quantity"/>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_qty_minus"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:text="@string/minus"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:backgroundTint="@android:color/transparent"
+                android:textColor="@color/purple_500"/>
+
+            <TextView
+                android:id="@+id/tv_qty"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:text="1"
+                android:gravity="center"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_qty_plus"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:text="@string/plus"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:backgroundTint="@android:color/transparent"
+                android:textColor="@color/purple_500"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_customize_cancel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                style="@style/Widget.Button.Cancel"
+                android:textColor="@color/white"
+                android:text="@string/cancel"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_customize_add"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                style="@style/Widget.Button.Add"
+                android:textColor="@color/white"
+                android:text="@string/add_to_cart_french"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

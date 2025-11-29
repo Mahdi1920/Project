@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/restaurantsFragment">
+
+    <!-- Use the RestaurantsFragment that wires the ViewModel/Repository (package tn.esprit.project.ui) -->
+    <fragment
+        android:id="@+id/restaurantsFragment"
+        android:name="tn.esprit.project.ui.fragments.RestaurantsFragment"
+        android:label="Restaurants">
+
+        <action
+            android:id="@+id/action_restaurants_to_menu"
+            app:destination="@id/menuFragment" />
+
+        <!-- action vers details -->
+        <action
+            android:id="@+id/action_restaurants_to_details"
+            app:destination="@id/restaurantDetailsFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/menuFragment"
+        android:name="tn.esprit.project.ui.fragments.MenuListFragment"
+        android:label="Menu">
+        <argument
+            android:name="restaurantId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+    </fragment>
+
+    <!-- Menu items (list of items for a specific Menu) -->
+    <fragment
+        android:id="@+id/menuItemsFragment"
+        android:name="tn.esprit.project.ui.fragments.MenuItemsFragment"
+        android:label="Menu items">
+        <argument
+            android:name="menuId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/restaurantDetailsFragment"
+        android:name="tn.esprit.project.ui.fragments.RestaurantDetailsFragment"
+        android:label="Détails restaurant">
+        <argument
+            android:name="restaurantId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+        <argument
+            android:name="restaurantName"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/cartFragment"
+        android:name="tn.esprit.project.ui.fragments.CartFragment"
+        android:label="Panier" />
+
+    <fragment
+        android:id="@+id/ordersFragment"
+        android:name="tn.esprit.project.ui.fragments.OrdersFragment"
+        android:label="Commandes" />
+
+    <fragment
+        android:id="@+id/orderDetailsFragment"
+        android:name="tn.esprit.project.ui.fragments.OrderDetailsFragment"
+        android:label="Order details">
+        <argument
+            android:name="orderId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="tn.esprit.project.ui.fragments.ProfileFragment"
+        android:label="Profil" />
+
+    <fragment
+        android:id="@+id/editProfileFragment"
+        android:name="tn.esprit.project.ui.fragments.EditProfileFragment"
+        android:label="Edit Profile" />
+
+    <fragment
+        android:id="@+id/orderTrackingFragment"
+        android:name="tn.esprit.project.ui.fragments.OrderTrackingFragment"
+        android:label="Suivi commande" />
+
+    <fragment
+        android:id="@+id/sandwichCustomizationFragment"
+        android:name="tn.esprit.project.ui.fragments.SandwichCustomizationFragment"
+        android:label="Personnaliser sandwich">
+        <argument
+            android:name="menuItemId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/aboutFragment"
+        android:name="tn.esprit.project.ui.fragments.AboutFragment"
+        android:label="À propos" />
+
+</navigation>
