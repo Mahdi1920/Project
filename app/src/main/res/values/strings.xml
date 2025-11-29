@@ -70,4 +70,10 @@
     <string name="order_details_title">Order #%1$d status history</string>
     <string name="show_on_map">Afficher sur la carte</string>
     <string name="btn_cancel">Annuler</string>
+    <string name="cart_empty_placeholder">Votre panier est vide</string>
+    <string name="payment_cash">Cash on delivery</string>
+    <string name="payment_card">Card</string>
+    <string name="go_to_restaurants">Aller aux restaurants</string>
+    <string name="go_to_cart">Aller au panier</string>
+    <string name="back_to_menu">Retour au menu</string>
 </resources>

@@ -16,9 +16,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import tn.esprit.project.utils.NavigationUtils;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -76,22 +76,33 @@ public class CartFragment extends Fragment {
 
         // NavController for navigation
         try {
-            // resolve using NavigationUtils which wraps multiple safe strategies
-            NavController resolved = NavigationUtils.findNavController(this, view);
-
-            if (resolved == null) {
-                // try to obtain NavHostFragment by id and get its controller
+            // First try the straightforward activity-based lookup (most reliable)
+            if (getActivity() != null) {
                 try {
-                    androidx.fragment.app.Fragment host = requireActivity().getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_container);
-                    if (host instanceof NavHostFragment) {
-                        resolved = ((NavHostFragment) host).getNavController();
-                    }
-                } catch (Exception inner) {
-                    Log.d("CartFragment", "Host lookup failed: " + inner.getMessage());
+                    this.navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_container);
+                } catch (Exception ignored) {
+                    this.navController = null;
                 }
             }
 
-            this.navController = resolved;
+            // If still null, resolve using NavigationUtils which wraps multiple safe strategies
+            if (this.navController == null) {
+                NavController resolved = NavigationUtils.findNavController(this, view);
+
+                if (resolved == null) {
+                    // try to obtain NavHostFragment by id and get its controller
+                    try {
+                        androidx.fragment.app.Fragment host = requireActivity().getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_container);
+                        if (host instanceof NavHostFragment) {
+                            resolved = ((NavHostFragment) host).getNavController();
+                        }
+                    } catch (Exception inner) {
+                        Log.d("CartFragment", "Host lookup failed: " + inner.getMessage());
+                    }
+                }
+
+                this.navController = resolved;
+            }
         } catch (Exception e) {
             Log.e("CartFragment", "Failed to obtain NavController", e);
         }
@@ -100,17 +111,25 @@ public class CartFragment extends Fragment {
         if (this.navController == null) {
             view.post(() -> {
                 try {
-                    NavController delayed = NavigationUtils.findNavController(CartFragment.this, view);
+                    NavController delayed = null;
+                    try {
+                        if (getActivity() != null) delayed = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_container);
+                    } catch (Exception ignored) {}
+
                     if (delayed == null) {
-                        try {
-                            androidx.fragment.app.Fragment host = requireActivity().getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_container);
-                            if (host instanceof NavHostFragment) {
-                                delayed = ((NavHostFragment) host).getNavController();
+                        delayed = NavigationUtils.findNavController(CartFragment.this, view);
+                        if (delayed == null) {
+                            try {
+                                androidx.fragment.app.Fragment host = requireActivity().getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_container);
+                                if (host instanceof NavHostFragment) {
+                                    delayed = ((NavHostFragment) host).getNavController();
+                                }
+                            } catch (Exception inner) {
+                                Log.d("CartFragment", "Delayed host lookup failed: " + inner.getMessage());
                             }
-                        } catch (Exception inner) {
-                            Log.d("CartFragment", "Delayed host lookup failed: " + inner.getMessage());
                         }
                     }
+
                     if (delayed != null) {
                         this.navController = delayed;
                         Log.d("CartFragment", "NavController resolved on delayed post");
@@ -214,12 +233,15 @@ public class CartFragment extends Fragment {
                         long orderId = viewModel.placeOrder(USER_ID);
                         if (orderId > 0) {
                             Toast.makeText(getContext(), "Commande validée", Toast.LENGTH_SHORT).show();
-                            // Navigate to Restaurants list (main customer flow)
+                            // Navigate to Orders list (main customer flow)
                             try {
-                                // robust navigate to restaurants (centralized)
-                                NavigationUtils.navigateTo(CartFragment.this, getView(), R.id.restaurantsFragment, null);
+                                if (this.navController != null) {
+                                    this.navController.navigate(R.id.ordersFragment);
+                                } else {
+                                    NavigationUtils.navigateTo(CartFragment.this, getView(), R.id.ordersFragment, null);
+                                }
                             } catch (Exception e) {
-                                // ignore navigation failures
+                                Log.e("CartFragment","Navigation after validate failed", e);
                             }
                         } else {
                             Toast.makeText(getContext(), "Le panier est vide", Toast.LENGTH_SHORT).show();
@@ -230,7 +252,8 @@ public class CartFragment extends Fragment {
         });
 
         btnGoRestaurants.setOnClickListener(v -> {
-            NavigationUtils.navigateTo(CartFragment.this, v, R.id.restaurantsFragment, null);
+            if (this.navController != null) this.navController.navigate(R.id.restaurantsFragment);
+            else NavigationUtils.navigateTo(CartFragment.this, v, R.id.restaurantsFragment, null);
         });
     }
 

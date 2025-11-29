@@ -20,6 +20,7 @@ import tn.esprit.project.R;
 import tn.esprit.project.models.Restaurant;
 import tn.esprit.project.repository.ClientRepository;
 import tn.esprit.project.ui.adapters.MenuListAdapter;
+import tn.esprit.project.utils.NavigationUtils;
 import tn.esprit.project.viewmodel.RestaurantsViewModel;
 import tn.esprit.project.viewmodel.ViewModelFactory;
 
@@ -81,20 +82,10 @@ public class MenuListFragment extends Fragment {
         });
 
         adapter.setOnMenuClickListener(menu -> {
-            // open Menu items fragment (reuse existing MenuFragment but it currently shows items for restaurant; we need a fragment that shows items for a menu)
-            // We'll navigate to MenuItemsFragment
-            MenuItemsFragment frag = new MenuItemsFragment();
             Bundle b = new Bundle();
             b.putInt("menuId", menu.getId());
             b.putString("menuName", menu.getName());
-            frag.setArguments(b);
-            requireActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right, android.R.anim.slide_in_left, android.R.anim.slide_out_right)
-                    .replace(R.id.nav_host_fragment_container, frag)
-                    .addToBackStack(null)
-                    .commit();
+            NavigationUtils.navigateTo(MenuListFragment.this, view, R.id.menuItemsFragment, b);
         });
     }
 }
-

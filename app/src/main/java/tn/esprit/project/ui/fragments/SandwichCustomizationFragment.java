@@ -1,6 +1,7 @@
 package tn.esprit.project.ui.fragments;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,7 +14,15 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.navigation.Navigation;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import tn.esprit.project.R;
+import tn.esprit.project.utils.NavigationUtils;
+import tn.esprit.project.utils.AppDatabase;
+import tn.esprit.project.models.CartItem;
 
 public class SandwichCustomizationFragment extends Fragment {
     private int menuItemId;
@@ -62,27 +71,97 @@ public class SandwichCustomizationFragment extends Fragment {
         });
 
         add.setOnClickListener(v -> {
-            Bundle result = new Bundle();
-            result.putInt("menuItemId", menuItemId);
-            result.putBoolean("onion", cbOnion != null && cbOnion.isChecked());
-            result.putBoolean("caramelized_onion", cbCaramelized != null && cbCaramelized.isChecked());
-            result.putBoolean("harissa", cbHarissa != null && cbHarissa.isChecked());
-            result.putBoolean("tomato", cbTomato != null && cbTomato.isChecked());
-            result.putInt("quantity", quantity);
+            // Build a readable summary of selected ingredients
+            StringBuilder sb = new StringBuilder();
+            sb.append(getString(R.string.add_to_cart_french)).append("\n\n");
+            sb.append(getString(R.string.item_name)).append(": ").append(menuItemId).append('\n');
+            sb.append(getString(R.string.quantity)).append(" : ").append(quantity).append('\n');
+            sb.append(getString(R.string.choose_ingredients)).append('\n');
+            if (cbOnion != null && cbOnion.isChecked()) sb.append("- ").append(getString(R.string.onion)).append('\n');
+            if (cbCaramelized != null && cbCaramelized.isChecked()) sb.append("- ").append(getString(R.string.caramelized_onion)).append('\n');
+            if (cbHarissa != null && cbHarissa.isChecked()) sb.append("- ").append(getString(R.string.harissa)).append('\n');
+            if (cbTomato != null && cbTomato.isChecked()) sb.append("- ").append(getString(R.string.tomato)).append('\n');
 
-            // Publish result so caller (menus/menu items fragment) can observe and add to cart
-            getParentFragmentManager().setFragmentResult("sandwich_customized", result);
-            CartFragment cartFragment = new CartFragment();
-            Bundle b = new Bundle();
-            b.putInt("menuItemId", menuItemId);
-            cartFragment.setArguments(b);
-            requireActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.nav_host_fragment_container, cartFragment)
-                    .addToBackStack(null)
-                    .commit();
-            Toast.makeText(requireContext(), R.string.added_to_cart, Toast.LENGTH_SHORT).show();
-            getParentFragmentManager().popBackStack();
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+            builder.setTitle(R.string.add_to_cart_french)
+                    .setMessage(sb.toString())
+                    // Positive: add and go to cart
+                    .setPositiveButton(R.string.go_to_cart, (dialog, which) -> {
+                        Bundle result = new Bundle();
+                        result.putInt("menuItemId", menuItemId);
+                        result.putBoolean("onion", cbOnion != null && cbOnion.isChecked());
+                        result.putBoolean("caramelized_onion", cbCaramelized != null && cbCaramelized.isChecked());
+                        result.putBoolean("harissa", cbHarissa != null && cbHarissa.isChecked());
+                        result.putBoolean("tomato", cbTomato != null && cbTomato.isChecked());
+                        result.putInt("quantity", quantity);
+
+                        // Prepare customizations list
+                        List<String> customizations = new ArrayList<>();
+                        if (cbOnion != null && cbOnion.isChecked()) customizations.add(getString(R.string.onion));
+                        if (cbCaramelized != null && cbCaramelized.isChecked()) customizations.add(getString(R.string.caramelized_onion));
+                        if (cbHarissa != null && cbHarissa.isChecked()) customizations.add(getString(R.string.harissa));
+                        if (cbTomato != null && cbTomato.isChecked()) customizations.add(getString(R.string.tomato));
+
+                        // Insert into DB on background thread (assume userId = 1)
+                        try {
+                            AppDatabase db = AppDatabase.getInstance(requireContext());
+                            CartItem cartItem = new CartItem(menuItemId, quantity, 1, customizations);
+                            new Thread(() -> {
+                                try { db.cartDAO().insertCartItem(cartItem); } catch (Exception ignored) {}
+                            }).start();
+                        } catch (Exception ignored) {}
+
+                        // Publish result so caller can update UI
+                        getParentFragmentManager().setFragmentResult("sandwich_customized", result);
+
+                        Toast.makeText(requireContext(), R.string.added_to_cart, Toast.LENGTH_SHORT).show();
+
+                        // navigate to cartFragment
+                        try {
+                            Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_container).navigate(R.id.cartFragment);
+                        } catch (Exception ex) {
+                            NavigationUtils.navigateTo(SandwichCustomizationFragment.this, view, R.id.cartFragment, null);
+                        }
+                    })
+                    // Negative: add and go back to menu (navigateUp)
+                    .setNegativeButton(R.string.back_to_menu, (dialog, which) -> {
+                        Bundle result = new Bundle();
+                        result.putInt("menuItemId", menuItemId);
+                        result.putBoolean("onion", cbOnion != null && cbOnion.isChecked());
+                        result.putBoolean("caramelized_onion", cbCaramelized != null && cbCaramelized.isChecked());
+                        result.putBoolean("harissa", cbHarissa != null && cbHarissa.isChecked());
+                        result.putBoolean("tomato", cbTomato != null && cbTomato.isChecked());
+                        result.putInt("quantity", quantity);
+
+                        // Prepare customizations list
+                        List<String> customizations = new ArrayList<>();
+                        if (cbOnion != null && cbOnion.isChecked()) customizations.add(getString(R.string.onion));
+                        if (cbCaramelized != null && cbCaramelized.isChecked()) customizations.add(getString(R.string.caramelized_onion));
+                        if (cbHarissa != null && cbHarissa.isChecked()) customizations.add(getString(R.string.harissa));
+                        if (cbTomato != null && cbTomato.isChecked()) customizations.add(getString(R.string.tomato));
+
+                        // Insert into DB on background thread (assume userId = 1)
+                        try {
+                            AppDatabase db = AppDatabase.getInstance(requireContext());
+                            CartItem cartItem = new CartItem(menuItemId, quantity, 1, customizations);
+                            new Thread(() -> {
+                                try { db.cartDAO().insertCartItem(cartItem); } catch (Exception ignored) {}
+                            }).start();
+                        } catch (Exception ignored) {}
+
+                        getParentFragmentManager().setFragmentResult("sandwich_customized", result);
+                        Toast.makeText(requireContext(), R.string.added_to_cart, Toast.LENGTH_SHORT).show();
+
+                        try {
+                            // navigate up to return to menuItems
+                            Navigation.findNavController(view).navigateUp();
+                        } catch (Exception ex) {
+                            // fallback: pop back stack
+                            try { getParentFragmentManager().popBackStack(); } catch (Exception ignored) {}
+                        }
+                    });
+
+            builder.create().show();
         });
 
         cancel.setOnClickListener(v -> getParentFragmentManager().popBackStack());

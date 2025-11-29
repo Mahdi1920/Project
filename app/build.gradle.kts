@@ -46,9 +46,12 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment:2.7.2")
     implementation("androidx.navigation:navigation-ui:2.7.2")
 
+    // Gson for JSON conversion in Room TypeConverters
+    implementation("com.google.code.gson:gson:2.10.1")
+
     // Glide for image loading (avatars)
-    implementation("com.github.bumptech.glide:glide:4.15.1")
-    annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
+//    implementation("com.github.bumptech.glide:glide:4.15.1")
+//    annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
 
 
     testImplementation(libs.junit)

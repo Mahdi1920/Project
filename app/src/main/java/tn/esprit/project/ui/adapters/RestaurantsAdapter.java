@@ -1,5 +1,6 @@
 package tn.esprit.project.ui.adapters;
 
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,9 +9,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,17 +52,32 @@ public class RestaurantsAdapter extends RecyclerView.Adapter<RestaurantsAdapter.
             String resName = img;
             if (resName.startsWith("@drawable/")) {
                 resName = resName.substring("@drawable/".length());
+            } else if (resName.startsWith("@mipmap/")) {
+                resName = resName.substring("@mipmap/".length());
             }
             int resId = holder.image.getContext().getResources().getIdentifier(resName, "drawable", holder.image.getContext().getPackageName());
-            RequestOptions opts = new RequestOptions().placeholder(android.R.drawable.ic_menu_report_image).error(android.R.drawable.ic_menu_report_image).centerCrop().override(400,300);
+            if (resId == 0) {
+                // try mipmap lookup
+                resId = holder.image.getContext().getResources().getIdentifier(resName, "mipmap", holder.image.getContext().getPackageName());
+            }
+
             if (resId != 0) {
-                Glide.with(holder.image.getContext()).load(resId).apply(opts).into(holder.image);
+                holder.image.setImageResource(resId);
             } else {
-                // try as URL
-                Glide.with(holder.image.getContext()).load(img).apply(opts).into(holder.image);
+                // If it's a local content/file URI, try to load it; otherwise fallback to default icon
+                try {
+                    if (img.startsWith("content:") || img.startsWith("file:")) {
+                        holder.image.setImageURI(Uri.parse(img));
+                    } else {
+                        // remote URLs (http/https) are not loaded without an image library; use placeholder
+                        holder.image.setImageResource(android.R.drawable.ic_menu_report_image);
+                    }
+                } catch (Exception e) {
+                    holder.image.setImageResource(android.R.drawable.ic_menu_report_image);
+                }
             }
         } else {
-            Glide.with(holder.image.getContext()).load(android.R.drawable.ic_menu_report_image).into(holder.image);
+            holder.image.setImageResource(android.R.drawable.ic_menu_report_image);
         }
 
         holder.itemView.setOnClickListener(v -> {

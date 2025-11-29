@@ -14,10 +14,4 @@
         android:icon="@drawable/ic_info"
         app:showAsAction="never" />
 
-    <item
-        android:id="@+id/action_cart"
-        android:title="@string/view_cart"
-        android:icon="@drawable/ic_food_placeholder"
-        app:showAsAction="ifRoom" />
-
 </menu>

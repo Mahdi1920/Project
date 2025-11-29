@@ -1,5 +1,6 @@
 package tn.esprit.project.ui.adapters;
 
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,9 +11,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,17 +51,34 @@ public class MenuListAdapter extends RecyclerView.Adapter<MenuListAdapter.VH> {
         // Hide price container (this view is for menus, not menu items)
         if (holder.priceContainer != null) holder.priceContainer.setVisibility(View.GONE);
 
-        // load image from imageUrl similar to RestaurantsAdapter
+        // load image from imageUrl similar to RestaurantsAdapter (no external library)
         String img = m.getImageUrl();
         if (img != null && !img.isEmpty()) {
             String resName = img;
             if (resName.startsWith("@drawable/")) resName = resName.substring("@drawable/".length());
+            else if (resName.startsWith("@mipmap/")) resName = resName.substring("@mipmap/".length());
+
             int resId = holder.img.getContext().getResources().getIdentifier(resName, "drawable", holder.img.getContext().getPackageName());
-            RequestOptions opts = new RequestOptions().placeholder(android.R.drawable.ic_menu_report_image).error(android.R.drawable.ic_menu_report_image).centerCrop().override(400,300);
-            if (resId != 0) Glide.with(holder.img.getContext()).load(resId).apply(opts).into(holder.img);
-            else Glide.with(holder.img.getContext()).load(img).apply(opts).into(holder.img);
+            if (resId == 0) {
+                resId = holder.img.getContext().getResources().getIdentifier(resName, "mipmap", holder.img.getContext().getPackageName());
+            }
+
+            if (resId != 0) {
+                holder.img.setImageResource(resId);
+            } else {
+                try {
+                    if (img.startsWith("content:") || img.startsWith("file:")) {
+                        holder.img.setImageURI(Uri.parse(img));
+                    } else {
+                        // remote URLs (http/https) are not loaded without an image library; use placeholder
+                        holder.img.setImageResource(android.R.drawable.ic_menu_report_image);
+                    }
+                } catch (Exception e) {
+                    holder.img.setImageResource(android.R.drawable.ic_menu_report_image);
+                }
+            }
         } else {
-            Glide.with(holder.img.getContext()).load(android.R.drawable.ic_menu_report_image).into(holder.img);
+            holder.img.setImageResource(android.R.drawable.ic_menu_report_image);
         }
 
         holder.itemView.setOnClickListener(v -> {

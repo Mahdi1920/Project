@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -45,14 +46,13 @@ public class RestaurantsFragment extends Fragment {
             args.putInt("restaurantId", restaurant.getId());
             args.putString("restaurantName", restaurant.getName());
 
-            // Open MenusFragment for the selected restaurant
-            MenuListFragment fragment = new MenuListFragment();
-            fragment.setArguments(args);
-            requireActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.nav_host_fragment_container, fragment)
-                    .addToBackStack(null)
-                    .commit();
+            // Use NavController from the view to navigate via Navigation Component
+            try {
+                Navigation.findNavController(view).navigate(R.id.action_restaurants_to_menu, args);
+            } catch (Exception e) {
+                // fallback: try navigate directly to menuFragment id
+                try { Navigation.findNavController(view).navigate(R.id.menuFragment, args); } catch (Exception ignored) {}
+            }
         });
 
         viewModel.getRestaurants().observe(getViewLifecycleOwner(), restaurants -> {

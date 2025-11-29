@@ -1,5 +1,6 @@
 package tn.esprit.project.ui.adapters;
 
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,9 +10,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,13 +53,35 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.VH> {
         MenuItem m = items.get(position);
         holder.name.setText(m.getName());
         holder.price.setText(String.valueOf(m.getPrice()));
-        // Load image with Glide using placeholder and size limit to avoid huge bitmaps
-        RequestOptions opts = new RequestOptions()
-                .placeholder(android.R.drawable.ic_menu_report_image)
-                .error(android.R.drawable.ic_menu_report_image)
-                .centerCrop()
-                .override(300, 300);
-        Glide.with(holder.img.getContext()).load(m.getImageUrl()).apply(opts).into(holder.img);
+        if (holder.desc != null) holder.desc.setText(m.getDescription() != null ? m.getDescription() : "");
+
+        // Load image without external libraries: try drawable/mipmap resource by name, then content/file URI, else placeholder
+        String img = m.getImageUrl();
+        if (img != null && !img.isEmpty()) {
+            String resName = img;
+            if (resName.startsWith("@drawable/")) resName = resName.substring("@drawable/".length());
+            else if (resName.startsWith("@mipmap/")) resName = resName.substring("@mipmap/".length());
+
+            int resId = holder.img.getContext().getResources().getIdentifier(resName, "drawable", holder.img.getContext().getPackageName());
+            if (resId == 0) resId = holder.img.getContext().getResources().getIdentifier(resName, "mipmap", holder.img.getContext().getPackageName());
+
+            if (resId != 0) {
+                holder.img.setImageResource(resId);
+            } else {
+                try {
+                    if (img.startsWith("content:") || img.startsWith("file:")) {
+                        holder.img.setImageURI(Uri.parse(img));
+                    } else {
+                        // remote URLs are not loaded without an image loader — use placeholder
+                        holder.img.setImageResource(android.R.drawable.ic_menu_report_image);
+                    }
+                } catch (Exception e) {
+                    holder.img.setImageResource(android.R.drawable.ic_menu_report_image);
+                }
+            }
+        } else {
+            holder.img.setImageResource(android.R.drawable.ic_menu_report_image);
+        }
 
         String lowerName = (m.getName() != null) ? m.getName().toLowerCase() : "";
         String lowerDesc = (m.getDescription() != null) ? m.getDescription().toLowerCase() : "";
@@ -95,6 +115,9 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.VH> {
             price = itemView.findViewById(R.id.tv_item_price);
             img = itemView.findViewById(R.id.iv_item_image);
             add = itemView.findViewById(R.id.btn_item_add);
+            // tv_item_desc may not exist in layout; guard against null
+            //View maybeDesc = itemView.findViewById(R.id.tv_item_desc);
+            desc = null;
         }
     }
 }

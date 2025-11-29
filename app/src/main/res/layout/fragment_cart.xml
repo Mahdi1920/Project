@@ -8,13 +8,6 @@
     android:layout_height="match_parent"
     tools:context="tn.esprit.project.ui.fragments.CartFragment">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar_cart"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:title="Panier"
-        app:titleTextColor="@color/black" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_cart"
         android:layout_width="match_parent"
@@ -27,7 +20,7 @@
         android:id="@+id/tv_empty_cart"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Votre panier est vide"
+        android:text="@string/cart_empty_placeholder"
         android:textAlignment="center"
         android:padding="16dp"
         android:visibility="gone"
@@ -65,13 +58,13 @@
                     android:id="@+id/rb_cash"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Cash on delivery" />
+                    android:text="@string/payment_cash" />
 
                 <RadioButton
                     android:id="@+id/rb_card"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Card" />
+                    android:text="@string/payment_card" />
 
             </RadioGroup>
 
@@ -87,7 +80,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     style="@style/Widget.Button.Cancel"
-                    android:text="Annuler" />
+                    android:text="@string/btn_cancel" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_validate"
@@ -95,7 +88,7 @@
                     android:layout_height="wrap_content"
                     style="@style/Widget.Button.Add"
                     android:layout_marginStart="12dp"
-                    android:text="Valider" />
+                    android:text="@string/confirm_order" />
 
                 <!-- Bouton alternatif affiché uniquement si le panier est vide -->
                 <com.google.android.material.button.MaterialButton
@@ -104,7 +97,7 @@
                     android:layout_height="wrap_content"
                     style="@style/Widget.Button.Add"
                     android:layout_marginStart="12dp"
-                    android:text="Aller aux restaurants"
+                    android:text="@string/go_to_restaurants"
                     android:visibility="gone" />
 
             </LinearLayout>

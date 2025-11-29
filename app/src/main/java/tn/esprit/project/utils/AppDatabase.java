@@ -1,12 +1,14 @@
 package tn.esprit.project.utils;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.TypeConverters;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import java.util.concurrent.ExecutorService;
@@ -31,8 +33,9 @@ import tn.esprit.project.models.User;
 import tn.esprit.project.models.OrderStatusUpdate;
 import tn.esprit.project.models.Favorite;
 
-// Increment version to force destructive migration when schema changes
-@Database(entities = {Restaurant.class, User.class, Menu.class, MenuItem.class, CartItem.class, Order.class, OrderItem.class, OrderStatusUpdate.class, Favorite.class}, version = 5, exportSchema = false)
+// Increment version to include new columns
+@Database(entities = {Restaurant.class, User.class, Menu.class, MenuItem.class, CartItem.class, Order.class, OrderItem.class, OrderStatusUpdate.class, Favorite.class}, version = 6, exportSchema = false)
+@TypeConverters(Converters.class)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static final String TAG = "AppDatabase";
@@ -51,6 +54,44 @@ public abstract class AppDatabase extends RoomDatabase {
     // Single thread executor for DB pre-population
     private static final ExecutorService databaseWriteExecutor = Executors.newSingleThreadExecutor();
 
+    // Helper: check if column exists in table
+    private static boolean columnExists(@NonNull SupportSQLiteDatabase db, @NonNull String tableName, @NonNull String columnName) {
+        Cursor cursor = null;
+        try {
+            cursor = db.query("PRAGMA table_info('" + tableName + "')");
+            if (cursor != null) {
+                while (cursor.moveToNext()) {
+                    int nameIdx = cursor.getColumnIndex("name");
+                    if (nameIdx >= 0) {
+                        String col = cursor.getString(nameIdx);
+                        if (columnName.equalsIgnoreCase(col)) return true;
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+        return false;
+    }
+
+    // Migration 5 -> 6: add customizations column to cart_items (if missing)
+    private static final androidx.room.migration.Migration MIGRATION_5_6 = new androidx.room.migration.Migration(5, 6) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            if (!columnExists(database, "cart_items", "customizations")) {
+                try {
+                    database.execSQL("ALTER TABLE cart_items ADD COLUMN customizations TEXT DEFAULT NULL");
+                    Log.d(TAG, "MIGRATION_5_6: added customizations column to cart_items");
+                } catch (Exception e) {
+                    Log.w(TAG, "MIGRATION_5_6: failed to add customizations column", e);
+                }
+            } else {
+                Log.d(TAG, "MIGRATION_5_6: customizations column already exists");
+            }
+        }
+    };
+
     public static AppDatabase getInstance(Context context) {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
@@ -61,11 +102,11 @@ public abstract class AppDatabase extends RoomDatabase {
                             .databaseBuilder(
                                     appContext,
                                     AppDatabase.class, "FoodDeliveryDb")
-                            //.addMigrations(MIGRATION_4_5)
+                            .addMigrations(MIGRATION_5_6)
                             .addCallback(sRoomDatabaseCallback)
                             .allowMainThreadQueries()
-                            // If you prefer destructive migration during dev uncomment next line
-                            //.fallbackToDestructiveMigration()
+                            // During development prefer destructive fallback to avoid migration breakage
+                            .fallbackToDestructiveMigration()
                             .build();
                 }
             }
@@ -73,17 +114,8 @@ public abstract class AppDatabase extends RoomDatabase {
         return INSTANCE;
     }
 
-    // Migration 4 -> 5: add avatar_url column to users table
-//    private static final androidx.room.migration.Migration MIGRATION_4_5 = new androidx.room.migration.Migration(4, 5) {
-//        @Override
-//        public void migrate(@NonNull SupportSQLiteDatabase database) {
-//            // add avatar_url column with default empty string
-//            database.execSQL("ALTER TABLE users ADD COLUMN avatar_url TEXT DEFAULT ''");
-//        }
-//    };
-
     // Callback pour pré-peupler la base lors de sa création
-    private static RoomDatabase.Callback sRoomDatabaseCallback = new RoomDatabase.Callback() {
+    private static final RoomDatabase.Callback sRoomDatabaseCallback = new RoomDatabase.Callback() {
         @Override
         public void onCreate(@NonNull SupportSQLiteDatabase db) {
             super.onCreate(db);
@@ -94,7 +126,7 @@ public abstract class AppDatabase extends RoomDatabase {
             databaseWriteExecutor.execute(() -> {
                 try {
                     // Utilisateur exemple (id auto gen)
-                    db.execSQL("INSERT INTO users (name, email, address, phoneNumber, status) VALUES ('Mahdi Chabbouh','mahdichabbouh98@gmail.com','Soukra','+2128249582','ENABLED','@mipmap/profile_round')");
+                    db.execSQL("INSERT INTO users (name, email, address, phoneNumber, status, avatar_url) VALUES ('Mahdi Chabbouh','mahdichabbouh98@gmail.com','Soukra','+2128249582','ENABLED','@mipmap/profile_round')");
 
                     // Restaurants
                     db.execSQL("INSERT INTO restaurants (name, address, phone_number, image_url) VALUES ('Pizzeria Roma','123 Main St','+21612345678','@drawable/pizza')"); // Example with local image
@@ -124,6 +156,12 @@ public abstract class AppDatabase extends RoomDatabase {
                     // Sandwiches menu (menu_id = 2)
                     db.execSQL("INSERT INTO menu_items (menu_id, name, description, price, image_url) VALUES (2,'Club Sandwich','Chicken, lettuce, tomato',5.5,'')");
                     db.execSQL("INSERT INTO menu_items (menu_id, name, description, price, image_url) VALUES (2,'Veggie Sandwich','Fresh veggies',4.5,'')");
+
+                    // Set available_customizations for sandwich menu (menu_id = 2)
+                    String sandwichCustomJson = "[\"Oignon\",\"Oignon caramélisé\",\"Harissa\",\"Tomate\"]";
+                    try {
+                        db.execSQL("UPDATE menu_items SET available_customizations = '" + sandwichCustomJson + "' WHERE menu_id = 2");
+                    } catch (Exception ignored) {}
 
                     // Plats menu (menu_id = 3)
                     db.execSQL("INSERT INTO menu_items (menu_id, name, description, price, image_url) VALUES (3,'Lasagna','Baked lasagna',9.0,'')");

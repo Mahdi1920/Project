@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import tn.esprit.project.R;
 import tn.esprit.project.models.OrderStatusUpdate;
 import tn.esprit.project.repository.ClientRepository;
@@ -31,6 +32,7 @@ public class OrdersFragment extends Fragment {
     private OrdersListAdapter adapter;
     private static final int USER_ID = 1; // demo user
     private static final String TAG = "OrdersFragment";
+    private final AtomicBoolean liveReceived = new AtomicBoolean(false);
 
     @Nullable
     @Override
@@ -43,6 +45,8 @@ public class OrdersFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         RecyclerView rv = view.findViewById(R.id.rv_orders);
         rv.setLayoutManager(new LinearLayoutManager(requireContext()));
+        rv.setHasFixedSize(false);
+        rv.setNestedScrollingEnabled(true);
         adapter = new OrdersListAdapter();
         rv.setAdapter(adapter);
 
@@ -50,13 +54,48 @@ public class OrdersFragment extends Fragment {
         ViewModelFactory factory = new ViewModelFactory(repo);
         OrdersViewModel viewModel = new ViewModelProvider(this, factory).get(OrdersViewModel.class);
 
+        // Debug: log synchronous orders (from DAO) to ensure DB contains all rows and as fallback
+        new Thread(() -> {
+            try {
+                java.util.List<tn.esprit.project.models.Order> syncOrders = repo.getOrders(USER_ID);
+                Log.d(TAG, "[SYNC] orders count = " + (syncOrders == null ? 0 : syncOrders.size()));
+                if (syncOrders != null) {
+                    for (tn.esprit.project.models.Order o : syncOrders) {
+                        if (o != null) Log.d(TAG, "[SYNC] order id=" + o.getId() + " status=" + o.getStatus() + " total=" + o.getTotalPrice());
+                    }
+
+                    // Fallback: if LiveData hasn't arrived yet, populate adapter from syncOrders
+                    if (!liveReceived.get() && !syncOrders.isEmpty()) {
+                        List<OrdersListAdapter.OrderDisplay> fallback = new ArrayList<>();
+                        for (tn.esprit.project.models.Order o : syncOrders) {
+                            if (o == null) continue;
+                            List<tn.esprit.project.models.OrderItem> items = repo.getOrderItems(o.getId());
+                            int count = items == null ? 0 : items.size();
+                            fallback.add(new OrdersListAdapter.OrderDisplay(o, count));
+                        }
+                        requireActivity().runOnUiThread(() -> {
+                            if (!liveReceived.get()) {
+                                adapter.setItems(fallback);
+                                Log.d(TAG, "Fallback adapter populated, size=" + adapter.getItemCount());
+                            }
+                        });
+                    }
+                }
+            } catch (Exception e) {
+                Log.w(TAG, "Failed to fetch sync orders", e);
+            }
+        }).start();
+
         viewModel.getOrderDisplaysLive(USER_ID).observe(getViewLifecycleOwner(), list -> {
+            Log.d(TAG, "LiveData received orders size = " + (list == null ? 0 : list.size()));
+            liveReceived.set(true);
             if (list != null) {
                 List<OrdersListAdapter.OrderDisplay> displays = new ArrayList<>();
                 for (OrdersViewModel.OrderDisplay od : list) {
                     displays.add(new OrdersListAdapter.OrderDisplay(od.order, od.itemCount));
                 }
                 adapter.setItems(displays);
+                Log.d(TAG, "Adapter.itemCount = " + adapter.getItemCount());
             } else {
                 adapter.setItems(new ArrayList<>());
             }

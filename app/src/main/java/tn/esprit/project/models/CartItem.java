@@ -4,6 +4,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.util.List;
+
 @Entity(tableName = "cart_items")
 public class CartItem {
     @PrimaryKey(autoGenerate = true)
@@ -18,6 +20,9 @@ public class CartItem {
     @ColumnInfo(name = "user_id")
     private int userId; // owner of the cart
 
+    @ColumnInfo(name = "customizations")
+    private List<String> customizations; // sandwich customizations (e.g., onion, harissa ...)
+
     // No-arg constructor required by Room
     public CartItem() {
     }
@@ -29,12 +34,29 @@ public class CartItem {
         this.userId = userId;
     }
 
+    // Constructor for insertion with customizations
+    public CartItem(int menuItemId, int quantity, int userId, List<String> customizations) {
+        this.menuItemId = menuItemId;
+        this.quantity = quantity;
+        this.userId = userId;
+        this.customizations = customizations;
+    }
+
     // Full constructor
     public CartItem(int id, int menuItemId, int quantity, int userId) {
         this.id = id;
         this.menuItemId = menuItemId;
         this.quantity = quantity;
         this.userId = userId;
+    }
+
+    // Full constructor with customizations
+    public CartItem(int id, int menuItemId, int quantity, int userId, List<String> customizations) {
+        this.id = id;
+        this.menuItemId = menuItemId;
+        this.quantity = quantity;
+        this.userId = userId;
+        this.customizations = customizations;
     }
 
     // Getters and setters
@@ -68,5 +90,13 @@ public class CartItem {
 
     public void setUserId(int userId) {
         this.userId = userId;
+    }
+
+    public List<String> getCustomizations() {
+        return customizations;
+    }
+
+    public void setCustomizations(List<String> customizations) {
+        this.customizations = customizations;
     }
 }
